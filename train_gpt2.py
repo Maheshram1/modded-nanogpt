@@ -164,6 +164,7 @@ class CausalSelfAttention(nn.Module):
         self.c_q = nn.Linear(self.n_embd, self.n_embd, bias=False)
         self.c_k = nn.Linear(self.n_embd, self.n_embd, bias=False)
         self.c_v = nn.Linear(self.n_embd, self.n_embd, bias=False)
+        self.c_v1 = nn.Linear(self.n_embd, self.n_embd, bias=False)
         # output projection
         self.c_proj = nn.Linear(self.n_embd, self.n_embd, bias=False)
         self.c_proj.weight.data.zero_() # zero init suggested by @Grad62304977
@@ -174,6 +175,8 @@ class CausalSelfAttention(nn.Module):
         q = self.c_q(x).view(B, T, self.n_head, self.head_dim)
         k = self.c_k(x).view(B, T, self.n_head, self.head_dim)
         v = self.c_v(x).view(B, T, self.n_head, self.head_dim)
+        v1 = self.c_v1(x).view(B, T, self.n_head, self.head_dim)
+        v = v*F.gelu(x)
         cos, sin = self.rotary(q)
         q, k = F.rms_norm(q, (q.size(-1),)), F.rms_norm(k, (k.size(-1),)) # QK norm suggested by @Grad62304977
         q, k = apply_rotary_emb(q, cos, sin), apply_rotary_emb(k, cos, sin)
